@@ -34,11 +34,17 @@ def main() -> None:
         default=0.3,
         help="Delay between submissions in seconds (default: 0.3)",
     )
+    parser.add_argument(
+        "--base-url",
+        required=True,
+        help="API base URL",
+    )
     args = parser.parse_args()
 
     from .download import download_all
 
     download_all(
+        base_url=args.base_url,
         out_dir=args.out_dir,
         from_date=args.from_date,
         to_date=args.to_date,

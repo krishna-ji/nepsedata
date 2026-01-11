@@ -79,10 +79,11 @@ def _download_one(
     session,
     from_date: str,
     to_date: str,
+    base_url: str,
 ) -> tuple[str, int, str | None]:
     """Download OHLCV for a single symbol. Returns (symbol, rows, error)."""
     try:
-        data = fetch_ohlcv(symbol, from_date, to_date, session=session)
+        data = fetch_ohlcv(symbol, base_url, from_date, to_date, session=session)
 
         if isinstance(data, dict):
             if data.get("s") != "ok":
@@ -130,6 +131,7 @@ def _download_one(
 
 
 def download_all(
+    base_url: str,
     out_dir: Path = Path("data"),
     from_date: str = "2010-01-01",
     to_date: str = "2026-12-31",
@@ -145,7 +147,7 @@ def download_all(
     # 1. Fetch sector listing
     session = _session()
     console.print("Fetching sector listing…")
-    raw = fetch_sectors(session)
+    raw = fetch_sectors(base_url, session)
     sector_map = build_sector_map(raw, exclude=exclude_sectors)
 
     # Save sector map
@@ -178,7 +180,7 @@ def download_all(
                 for sym in symbols:
                     csv_path = out_dir / "ohlcv" / "1D" / sector_slug / f"{sym}.csv"
                     fut = pool.submit(
-                        _download_one, sym, csv_path, session, from_date, to_date
+                        _download_one, sym, csv_path, session, from_date, to_date, base_url
                     )
                     futures[fut] = (sector_slug, sym)
                     time.sleep(delay)  # stagger submissions

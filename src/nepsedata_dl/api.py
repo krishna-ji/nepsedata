@@ -6,7 +6,6 @@ import time
 
 import requests
 
-BASE_URL = "https://api.nepsetrading.com"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:148.0) Gecko/20100101 Firefox/148.0",
     "Accept": "application/json, text/plain, */*",
@@ -23,16 +22,20 @@ def _session() -> requests.Session:
     return s
 
 
-def fetch_sectors(session: requests.Session | None = None) -> list[dict]:
+def fetch_sectors(
+    base_url: str,
+    session: requests.Session | None = None,
+) -> list[dict]:
     """Return all symbols with their sector from the sectors endpoint."""
     s = session or _session()
-    r = s.get(f"{BASE_URL}/historical-chart/sectors", timeout=30)
+    r = s.get(f"{base_url}/historical-chart/sectors", timeout=30)
     r.raise_for_status()
     return r.json()
 
 
 def fetch_ohlcv(
     symbol: str,
+    base_url: str,
     from_date: str = "1970-01-01",
     to_date: str = "2026-12-31",
     session: requests.Session | None = None,
@@ -40,7 +43,7 @@ def fetch_ohlcv(
     """Return raw OHLCV JSON for a single symbol."""
     s = session or _session()
     r = s.get(
-        f"{BASE_URL}/historical-chart/daily/adjusted",
+        f"{base_url}/historical-chart/daily/adjusted",
         params={"code": symbol, "from": from_date, "to": to_date},
         timeout=30,
     )
